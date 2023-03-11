@@ -1,7 +1,7 @@
 import csv
 import os
 
-DAY_INDEX = 9
+DAY_INDEX = 8
 DAYS = [
     ("Monday", "2023-02-27", "01_Maandag"),
     ("Tudesday", "2023-02-28", "02_Dinsdag"),

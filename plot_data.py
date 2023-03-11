@@ -6,7 +6,7 @@ import csv
 from datetime import datetime
 
 # Which day to plot.
-DAY_INDEX = 1
+DAY_INDEX = 8
 # Moving average window size.
 MOVING_AVERAGE_WINDOW = 20
 DAYS = [
