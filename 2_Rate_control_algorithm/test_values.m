@@ -4,20 +4,31 @@ clear all;
 number_of_simulations_per_value = 5;
 min_probe_packet_modulus = 2;
 number_of_probe_packet_modulus = 7;
+number_of_max_jump = 5;
+min_max_jump = 0.5;
+max_jump_step_size = 1;
 min_mean_SNR = 10;
 number_of_mean_SNR = 10;
 mean_SNR_step_size = 2;
+min_amplitude = 1;
+amplitude_step_size = 3;
+number_of_amplitude = 10;
 
 %Initializing matrices
-mean_troughput_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-mean_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-min_troughput_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-min_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-max_troughput_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-meax_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
+mean_troughput_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+mean_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+min_troughput_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+min_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+max_troughput_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+meax_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+mean_ber_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+min_ber_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+max_ber_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
 
-for k = 1:number_of_probe_packet_modulus
-    probe_packet_modulus = k+min_probe_packet_modulus-1; 
+ber_iterations = zeros(1,number_of_simulations_per_value);
+
+for k = 1:number_of_amplitude
+    amplitude = amplitude_step_size * k+min_amplitude - amplitude_step_size; 
     for j = 1:number_of_mean_SNR
         meanSNR = mean_SNR_step_size*(j-1)+min_mean_SNR;
         s = rng(21);
@@ -40,6 +51,7 @@ for k = 1:number_of_probe_packet_modulus
             ov_per = str2num(ov_per);
             accumulated_troughput = accumulated_troughput + ov_dr;
             accumulated_packet_error = accumulated_packet_error + ov_per;
+            ber_iterations(1,i) = mean(ber);
             
             %Determine min and max values
             if ov_dr > max_troughput
@@ -64,12 +76,15 @@ for k = 1:number_of_probe_packet_modulus
         
         mean_troughput_matrix(j,k) = mean_troughput;
         mean_packet_rate_matrix(j,k) = mean_packet_error;
+        mean_ber_matrix(j,k) = mean(ber_iterations);
         
         min_troughput_matrix(j,k) = min_troughput;
         min_packet_rate_matrix(j,k) = min_packet_error;
+        min_ber_matrix(j,k) = min(ber_iterations);
         
         max_troughput_matrix(j,k) = max_troughput;
         max_packet_rate_matrix(j,k) = max_packet_error;
+        max_ber_matrix(j,k) = max(ber_iterations);
    
     end
 end

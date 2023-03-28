@@ -112,11 +112,11 @@ numPackets = 50; % NOTE: the more, the better for relability; Number of packets 
 % Select SNR for the simulation
 
 % meanSNR = 22;                                                   % I will select this value myself in final evaluation ---> Mean SNR
-amplitude = 14;                                                 % I will select this value myself in final evaluation ---> Variation in SNR around the average mean SNR value
+%amplitude = 14;                                                 % I will select this value myself in final evaluation ---> Variation in SNR around the average mean SNR value
 baseSNR = sin(linspace(1,10,numPackets)) * amplitude + meanSNR; % DO NOT CHANGE THIS % Generate varying SNR values for each transmitted packet                                                   
 maxJump = 0.5;                                                  % I will select this value myself in final evaluation ---> The maxJump controls the maximum SNR difference between one packet and the next 
 snrWalk = baseSNR(1);                                           % DO NOT CHANGE THIS % Set the initial SNR value
 
-% TransmitRateControlTemplateET4394
-algo2
+ TransmitRateControlTemplateET4394
+%algo2
 % [PUT YOUR OWN RATE CONTROL SCRIP HERE FOLLOWING TransmitRateControlTemplateET4394 TEMPLATE]
