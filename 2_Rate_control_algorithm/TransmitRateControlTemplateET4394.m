@@ -60,7 +60,7 @@ for numPkt = 1:numPackets
     % Calculate packet error rate (PER)
     if isempty(y.RxPSDU)
         % Set the PER of an undetected packet to NaN
-        ber(numPkt) = NaN;
+        ber(numPkt) = 1;
     else
         [~,ber(numPkt)] = biterr(y.RxPSDU,txPSDU);
     end

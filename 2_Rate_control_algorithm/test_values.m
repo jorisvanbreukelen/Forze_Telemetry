@@ -15,20 +15,21 @@ amplitude_step_size = 3;
 number_of_amplitude = 10;
 
 %Initializing matrices
-mean_troughput_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
-mean_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
-min_troughput_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
-min_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
-max_troughput_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
-meax_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
-mean_ber_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
-min_ber_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
-max_ber_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+mean_troughput_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
+mean_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
+min_troughput_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
+min_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
+max_troughput_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
+meax_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
+mean_ber_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
+min_ber_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
+max_ber_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
 
 ber_iterations = zeros(1,number_of_simulations_per_value);
 
-for k = 1:number_of_amplitude
-    amplitude = amplitude_step_size * k+min_amplitude - amplitude_step_size; 
+for k = 1:number_of_max_jump
+    %amplitude = amplitude_step_size * k+min_amplitude - amplitude_step_size;
+    maxJump = max_jump_step_size * k + min_max_jump - max_jump_step_size;
     for j = 1:number_of_mean_SNR
         meanSNR = mean_SNR_step_size*(j-1)+min_mean_SNR;
         s = rng(21);
