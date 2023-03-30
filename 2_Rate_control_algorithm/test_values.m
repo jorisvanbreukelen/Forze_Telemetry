@@ -15,21 +15,21 @@ amplitude_step_size = 3;
 number_of_amplitude = 10;
 
 %Initializing matrices
-mean_troughput_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
-mean_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
-min_troughput_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
-min_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
-max_troughput_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
-meax_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
-mean_ber_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
-min_ber_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
-max_ber_matrix = zeros(number_of_mean_SNR,number_of_max_jump);
+mean_troughput_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+mean_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+min_troughput_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+min_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+max_troughput_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+max_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+mean_ber_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+min_ber_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
+max_ber_matrix = zeros(number_of_mean_SNR,number_of_amplitude);
 
 ber_iterations = zeros(1,number_of_simulations_per_value);
 
-for k = 1:number_of_max_jump
-    %amplitude = amplitude_step_size * k+min_amplitude - amplitude_step_size;
-    maxJump = max_jump_step_size * k + min_max_jump - max_jump_step_size;
+for k = 1:number_of_amplitude
+    amplitude = amplitude_step_size * k+min_amplitude - amplitude_step_size;
+%     maxJump = max_jump_step_size * k + min_max_jump - max_jump_step_size;
     for j = 1:number_of_mean_SNR
         meanSNR = mean_SNR_step_size*(j-1)+min_mean_SNR;
         s = rng(21);
@@ -98,31 +98,3 @@ disp(['Max packet error: ' num2str(max_packet_error)]);
 disp(['Min packet error: ' num2str(min_packet_error)]);
 
 close all;
-
-%Create legends for plotting
-probe_packet_modulus_legend = min_probe_packet_modulus:min_probe_packet_modulus+number_of_probe_packet_modulus-1; 
-MeanSNR_legend = min_mean_SNR:mean_SNR_step_size:mean_SNR_step_size*(number_of_mean_SNR-1)+min_mean_SNR; 
-
-%2D plot
-for i = 1:number_of_mean_SNR
-    %Create confidence intervals with min and max values
-    xconf = [probe_packet_modulus_legend probe_packet_modulus_legend(end:-1:1)] ;         
-    yconf = [max_troughput_matrix(i,1:end) min_troughput_matrix(i,end:-1:1)];
-    
-    %Plot confidence intervals red
-    p = fill(xconf,yconf,'red');
-    hold on;
-    p.FaceColor = [1 0.8 0.8];      
-    p.EdgeColor = 'none';
-    
-    xlabel('Probe packet modulus')
-    ylabel('Troughput [Mbps]')
-    legend(num2str(i))
-    plot(probe_packet_modulus_legend,mean_troughput_matrix(i,1:end))
-end
-
-
-%3D plot
-% hold on;
-% surf(probe_packet_modulus_legend,MeanSNR_legend,mean_troughput_matrix)
-% surf(probe_packet_modulus_legend,MeanSNR_legend,mean_packet_rate_matrix)

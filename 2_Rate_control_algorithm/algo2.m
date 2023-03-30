@@ -15,9 +15,9 @@
 % s = rng(21); % It will be restored later as rng(s)
 
 %% Rate Control Algorithm Parameters
-errorSNR_offset = 2; % SNR needs to be higher than errorSNR + offset to start probing
+errorSNR_offset = 1; % SNR needs to be higher than errorSNR + offset to start probing
 probe_startup = true; % Enable startup probing.
-% probe_packet_modulus = 6; % Probe higher bit rate every X packets.
+probe_packet_modulus = 6; % Probe higher bit rate every X packets.
 enable_fast_decrease = true;
 
 %% Define simulation variables
@@ -83,7 +83,7 @@ for numPkt = 1:numPackets
     % Calculate packet error rate (PER)
     if isempty(y.RxPSDU)
         % Set the PER of an undetected packet to NaN
-        ber(numPkt) = NaN;
+        ber(numPkt) = 1;
     else
         [~,ber(numPkt)] = biterr(y.RxPSDU,txPSDU);
     end
@@ -134,7 +134,7 @@ disp(['Overall data rate: ' ov_dr ' Mbps']);
 ov_per = num2str(numel(find(ber))/numPackets);
 disp(['Overall packet error rate: ' ov_per]);
 
-plotResults(ber,packetLength,snrMeasured,MCS,cfgVHT);
+% plotResults(ber,packetLength,snrMeasured,MCS,cfgVHT);
 
 % Restore default stream
 % rng(s);

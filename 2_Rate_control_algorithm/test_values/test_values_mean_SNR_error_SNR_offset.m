@@ -2,31 +2,34 @@ clear all;
 
 %To run this script correctly, comment out:
 % meanSNR in execute_all_rate_control_algorithms.m (line 114)
-% probe_packet_modulus in algo.m(line 20)
+% errorSNR_offset in algo2.m (line 18)
+% s = rng(21); in algo2.m (line 15)
+% rng(s); in algo2.m (line 140) 
 
 % Plotting paramets
-number_of_simulations_per_value = 1; %5
-min_probe_packet_modulus = 2;
-number_of_probe_packet_modulus = 10; %7
-min_mean_SNR = 18; %10
-number_of_mean_SNR = 50; %10
-mean_SNR_step_size = 0.1;
+number_of_simulations_per_value = 5; %5
+min_error_SNR_offset = 0;
+error_SNR_offset_step_size = 0.5;
+number_of_error_SNR_offset = 10; %7
+min_mean_SNR = 10; %10
+number_of_mean_SNR = 10; %10
+mean_SNR_step_size = 2;
 
 %Initializing matrices
-mean_troughput_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-mean_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-min_troughput_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-min_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-max_troughput_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-max_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-mean_ber_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-min_ber_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
-max_ber_matrix = zeros(number_of_mean_SNR,number_of_probe_packet_modulus);
+mean_troughput_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
+mean_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
+min_troughput_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
+min_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
+max_troughput_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
+max_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
+mean_ber_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
+min_ber_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
+max_ber_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
 
 ber_iterations = zeros(1,number_of_simulations_per_value);
 
-for k = 1:number_of_probe_packet_modulus
-    probe_packet_modulus = k+min_probe_packet_modulus-1; 
+for k = 1:number_of_error_SNR_offset
+    errorSNR_offset = min_error_SNR_offset + (k-1)*error_SNR_offset_step_size;
     for j = 1:number_of_mean_SNR
         meanSNR = mean_SNR_step_size*(j-1)+min_mean_SNR;
         s = rng(21);
@@ -97,13 +100,14 @@ disp(['Min packet error: ' num2str(min_packet_error)]);
 close all;
 
 %Create legends for plotting
-probe_packet_modulus_legend = min_probe_packet_modulus:min_probe_packet_modulus+number_of_probe_packet_modulus-1; 
-MeanSNR_legend = min_mean_SNR:mean_SNR_step_size:mean_SNR_step_size*(number_of_mean_SNR-1)+min_mean_SNR; 
+error_SNR_offset_legend = min_error_SNR_offset:error_SNR_offset_step_size:min_error_SNR_offset+(number_of_error_SNR_offset-1)*error_SNR_offset_step_size; 
+MeanSNR_legend = min_mean_SNR:mean_SNR_step_size:min_mean_SNR+mean_SNR_step_size*(number_of_mean_SNR-1); 
+
 
 %2D plot
 for i = 1:number_of_mean_SNR
     %Create confidence intervals with min and max values
-    xconf = [probe_packet_modulus_legend probe_packet_modulus_legend(end:-1:1)] ;         
+    xconf = [error_SNR_offset_legend error_SNR_offset_legend(end:-1:1)] ;         
     yconf = [max_troughput_matrix(i,1:end) min_troughput_matrix(i,end:-1:1)];
     
     %Plot confidence intervals red

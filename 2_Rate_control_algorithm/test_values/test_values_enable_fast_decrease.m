@@ -1,37 +1,34 @@
 clear all;
 
 %To run this script correctly, comment out:
-% meanSNR in execute_all_rate_control_algorithms.m (line 114)
-% errorSNR_offset in algo2.m (line 18)
+% maxJump in execute_all_rate_control_algorithms.m (line 117)
+% enable_fast_decrease in algo2.m (line 21)
 % s = rng(21); in algo2.m (line 15)
 % rng(s); in algo2.m (line 140) 
 
 % Plotting paramets
-number_of_simulations_per_value = 2; %5
-min_error_SNR_offset = 1;
-error_SNR_offset_step_size = 0.2;
-number_of_error_SNR_offset = 3; %7
-min_mean_SNR = 18; %10
-number_of_mean_SNR = 2; %10
-mean_SNR_step_size = 2;
+number_of_simulations_per_value = 5; %5
+min_max_jump = 0.5; %10
+number_of_max_jump = 7; %10
+max_jump_step_size = 0.5;
 
 %Initializing matrices
-mean_troughput_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
-mean_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
-min_troughput_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
-min_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
-max_troughput_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
-max_packet_rate_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
-mean_ber_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
-min_ber_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
-max_ber_matrix = zeros(number_of_mean_SNR,number_of_error_SNR_offset);
+mean_troughput_matrix = zeros(number_of_max_jump,2);
+mean_packet_rate_matrix = zeros(number_of_max_jump,2);
+min_troughput_matrix = zeros(number_of_max_jump,2);
+min_packet_rate_matrix = zeros(number_of_max_jump,2);
+max_troughput_matrix = zeros(number_of_max_jump,2);
+max_packet_rate_matrix = zeros(number_of_max_jump,2);
+mean_ber_matrix = zeros(number_of_max_jump,2);
+min_ber_matrix = zeros(number_of_max_jump,2);
+max_ber_matrix = zeros(number_of_max_jump,2);
 
 ber_iterations = zeros(1,number_of_simulations_per_value);
 
-for k = 1:number_of_error_SNR_offset
-    errorSNR_offset = min_error_SNR_offset + (k-1)*error_SNR_offset_step_size;
-    for j = 1:number_of_mean_SNR
-        meanSNR = mean_SNR_step_size*(j-1)+min_mean_SNR;
+for k = 1:2
+    enable_fast_decrease = k-1; %true or false
+    for j = 1:number_of_max_jump
+        maxJump = max_jump_step_size*(j-1)+min_max_jump;
         s = rng(21);
         min_troughput = inf;
         max_troughput = 0;
@@ -100,14 +97,13 @@ disp(['Min packet error: ' num2str(min_packet_error)]);
 close all;
 
 %Create legends for plotting
-error_SNR_offset_legend = min_error_SNR_offset:error_SNR_offset_step_size:min_error_SNR_offset+(number_of_error_SNR_offset-1)*error_SNR_offset_step_size; 
-MeanSNR_legend = min_mean_SNR:mean_SNR_step_size:min_mean_SNR+mean_SNR_step_size*(number_of_mean_SNR-1); 
-
+probe_packet_modulus_legend = min_probe_packet_modulus:min_probe_packet_modulus+number_of_probe_packet_modulus-1; 
+max_jump_legend = min_max_jump:max_jump_step_size:max_jump_step_size*(number_of_max_jump-1)+min_max_jump; 
 
 %2D plot
-for i = 1:number_of_mean_SNR
+for i = 1:number_of_max_jump
     %Create confidence intervals with min and max values
-    xconf = [error_SNR_offset_legend error_SNR_offset_legend(end:-1:1)] ;         
+    xconf = [probe_packet_modulus_legend probe_packet_modulus_legend(end:-1:1)] ;         
     yconf = [max_troughput_matrix(i,1:end) min_troughput_matrix(i,end:-1:1)];
     
     %Plot confidence intervals red

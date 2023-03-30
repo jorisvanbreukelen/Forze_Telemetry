@@ -41,6 +41,9 @@
 % antenna and QPSK rate-1/2 (MCS 1). The MCS for the subsequent packets
 % is changed by the algorithm throughout the simulation.
 
+clear all;
+close all;
+
 cfgVHT = wlanVHTConfig;         
 cfgVHT.ChannelBandwidth = 'CBW40'; % 40 MHz channel bandwidth
 cfgVHT.MCS = 1;                    % QPSK rate-1/2
@@ -84,12 +87,39 @@ tgacChannel.SampleRate = sr;
 % packet errors are expected. These settings may not be suitable for other
 % scenarios.
 
+
+% Can be deleted I think
+% _______________________________________________________________
 rcaAttack = 1;  % Control the sensitivity when MCS is increasing
 rcaRelease = 0; % Control the sensitivity when MCS is decreasing
 threshold = [11 14 19 20 25 28 30 31 35]; 
 snrUp = [threshold inf]+rcaAttack;
 snrDown = [-inf threshold]-rcaRelease;
+% - - - - - - - - - - - - - - - - - - - - - - - -
 snrInd = cfgVHT.MCS; % Store the start MCS value
+%________________________________________________
+
+
+% Algorithm parameters:
+
+DIFS = 34e-6; %DCF Interframe Space for 802.11ac
+SIFS = 16e-6; %Short Interframe Space for 802.11ac
+Ack_length_bits = 320; %40 bytes
+% R_b = 1e6; %Bit rate
+numPackets = 100; % Number of packets transmitted during the simulation
+R_b = zeros(numPackets,1); %Bit rate
+%EIFS = DIFS + SIFS + Ack_length_bits/R_b; %Extended interframe space
+
+% Number of packets for current, higher, and lower modulation schemes (maybe switch to timebased intervals?)
+main_MCS_packets = 8;
+higher_MCS_packets = 1;
+lower_MCS_packets = 1;
+cycle_length = main_MCS_packets+higher_MCS_packets+lower_MCS_packets;
+a = zeros(cycle_length,1);
+a(main_MCS_packets+1:main_MCS_packets+higher_MCS_packets) = 1;
+a(main_MCS_packets+higher_MCS_packets+1:end) = -1;
+
+
 
 %% Simulation Parameters
 % In this simulation |numPackets| packets are transmitted through a TGac
@@ -128,7 +158,7 @@ end
 
 % To plot the equalized constellation for each spatial stream set
 % displayConstellation to true
-displayConstellation = true;
+displayConstellation = false;
 if displayConstellation
     ConstellationDiagram = comm.ConstellationDiagram; %#ok<UNRCH>
     ConstellationDiagram.ShowGrid = true;
@@ -139,7 +169,7 @@ end
 snrMeasured = zeros(1,numPackets);
 MCS = zeros(1,numPackets);
 ber = zeros(1,numPackets);
-packetLength = zeros(1,numPackets);
+packet_length_time = zeros(1,numPackets);
 
 %% Processing Chain
 % The following processing steps occur for each packet:
@@ -180,6 +210,7 @@ for numPkt = 1:numPackets
     end
     
     % Generate a single packet waveform
+    packet_length_bits = 8*cfgVHT.PSDULength; 
     txPSDU = randi([0,1],8*cfgVHT.PSDULength,1,'int8');
     txWave = wlanWaveformGenerator(txPSDU,cfgVHT,'IdleTime',5e-4);
     
@@ -203,7 +234,7 @@ for numPkt = 1:numPackets
     end
     
     % Determine the length of the packet in seconds including idle time
-    packetLength(numPkt) = y.RxWaveformLength/sr;
+    packet_length_time(numPkt) = y.RxWaveformLength/sr;
     
     % Calculate packet error rate (PER)
     if isempty(y.RxPSDU)
@@ -211,16 +242,27 @@ for numPkt = 1:numPackets
         ber(numPkt) = NaN;
     else
         [~,ber(numPkt)] = biterr(y.RxPSDU,txPSDU);
+        disp(biterr(y.RxPSDU,txPSDU))
+        disp(['Bit error rate of packet ' num2str(numPkt) ': ' num2str(ber(numPkt))])
     end
 
+    % Our algorithm 
+    R_b(numPkt) = packet_length_bits/packet_length_time(numPkt);
+    disp(['Bit rate of packet ' num2str(numPkt) ': ' num2str(R_b(numPkt)/1e6) ' Mbps'])
+    disp(a(mod(numPkt,cycle_length)+1))
+    
     % Compare the estimated SNR to the threshold, and adjust the MCS value
     % used for the next packet
     MCS(numPkt) = cfgVHT.MCS; % Store current MCS value
+%     MCS(numPkt);
     increaseMCS = (mean(y.EstimatedSNR) > snrUp((snrInd==0)+snrInd));
     decreaseMCS = (mean(y.EstimatedSNR) <= snrDown((snrInd==0)+snrInd));
     snrInd = snrInd+increaseMCS-decreaseMCS;
+    disp(['MCS value of packet ' num2str(numPkt) ': ' num2str(snrInd)])
     cfgVHT.MCS = snrInd-1;
 end
+
+MCS = MCS';
 
 %% Display and Plot Simulation Results
 % This example plots the variation of MCS, SNR, BER, and data throughput
@@ -240,10 +282,10 @@ end
 % decreases or when a packet error occurs.
 
 % Display and plot simulation results
-disp(['Overall data rate: ' num2str(8*cfgVHT.APEPLength*(numPackets-numel(find(ber)))/sum(packetLength)/1e6) ' Mbps']);
+disp(['Overall data rate: ' num2str(8*cfgVHT.APEPLength*(numPackets-numel(find(ber)))/sum(packet_length_time)/1e6) ' Mbps']);
 disp(['Overall packet error rate: ' num2str(numel(find(ber))/numPackets)]);
 
-plotResults(ber,packetLength,snrMeasured,MCS,cfgVHT);
+plotResults(ber,packet_length_time,snrMeasured,MCS,cfgVHT);
 
 % Restore default stream
 rng(s);
